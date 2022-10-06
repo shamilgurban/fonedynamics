@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Fonedynamics.Console": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

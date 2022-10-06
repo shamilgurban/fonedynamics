@@ -1,0 +1,57 @@
+version: '3.4'
+
+services:
+  fonedynamics.api:
+    image: ${DOCKER_REGISTRY-}fonedynamicsapi
+    restart: on-failure
+    environment:
+      - "ConnectionStrings__DefaultConnection=Server=fonedynamicsdb;Database=PhonedynamicsDb;User Id=sa;Password=P@ssw0rd!;"
+    build:
+      context: .
+      dockerfile: Services/API/Fonedynamics.API/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      fonedynamicsdb:
+        condition: service_started
+
+  fonedynamics.console:
+    image: ${DOCKER_REGISTRY-}fonedynamicsconsole
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Services/Console/Fonedynamics.Console/Dockerfile
+    stdin_open: true
+    tty: true
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      fonedynamicsdb:
+        condition: service_started
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    volumes:
+      - 'rabbitmq_data:/data'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  fonedynamicsdb:
+    image: "mcr.microsoft.com/mssql/server"
+    volumes:
+      - 'mssql:/data'
+    ports:
+        - "1433:1433"
+    environment:
+        SA_PASSWORD: "P@ssw0rd!"
+        ACCEPT_EULA: "Y"
+
+volumes:
+  rabbitmq_data:
+  mssql:
