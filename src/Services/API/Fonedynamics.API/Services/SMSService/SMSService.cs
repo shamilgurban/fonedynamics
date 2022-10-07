@@ -49,7 +49,12 @@ namespace Fonedynamics.API.Services.SMSService
 
         public async Task<SMSViewModel> GetSMSById(Guid id)
         {
-            return mapper.Map<SMSViewModel>(await smsRepository.GetSMSById(id));
+            var sms = mapper.Map<SMSViewModel>(await smsRepository.GetSMSById(id));
+            if (sms is null)
+            {
+                throw new Exception("Object not found");
+            }
+            return sms;
         }
     }
 }
